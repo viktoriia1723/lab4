@@ -4,4 +4,4 @@ target/
 .vscode/
 *.iml
 .DS_Store
-*.log
+*.log.vscode/
