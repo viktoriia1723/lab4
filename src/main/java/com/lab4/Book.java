@@ -1,62 +1,64 @@
 package com.lab4;
 
-import java.util.Objects;
-
 public class Book {
-
     private String title;
     private String author;
-    private int year;
-    private double price;
     private int pages;
+    private double price;
 
-    public Book(String title, String author, int year, double price, int pages) {
+    public Book(String title, String author, int pages, double price) {
+        setTitle(title);
+        setAuthor(author);
+        setPages(pages);
+        setPrice(price);
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        if (title == null || title.isEmpty()) {
+            throw new IllegalArgumentException("Title cannot be empty");
+        }
         this.title = title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        if (author == null || author.isEmpty()) {
+            throw new IllegalArgumentException("Author cannot be empty");
+        }
         this.author = author;
-        this.year = year;
-        this.price = price;
+    }
+
+    public int getPages() {
+        return pages;
+    }
+
+    public void setPages(int pages) {
+        if (pages <= 0) {
+            throw new IllegalArgumentException("Pages must be > 0");
+        }
         this.pages = pages;
     }
 
-    // Гетери
-    public String getTitle()  { return title; }
-    public String getAuthor() { return author; }
-    public int getYear()      { return year; }
-    public double getPrice()  { return price; }
-    public int getPages()     { return pages; }
+    public double getPrice() {
+        return price;
+    }
 
-    // Сетери
-    public void setTitle(String title)   { this.title = title; }
-    public void setAuthor(String author) { this.author = author; }
-    public void setYear(int year)        { this.year = year; }
-    public void setPrice(double price)   { this.price = price; }
-    public void setPages(int pages)      { this.pages = pages; }
+    public void setPrice(double price) {
+        if (price <= 0) {
+            throw new IllegalArgumentException("Price must be > 0");
+        }
+        this.price = price;
+    }
 
     @Override
     public String toString() {
-        return "Book{" +
-                "title='" + title + '\'' +
-                ", author='" + author + '\'' +
-                ", year=" + year +
-                ", price=" + price +
-                ", pages=" + pages +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Book book = (Book) o;
-        return year == book.year &&
-                Double.compare(book.price, price) == 0 &&
-                pages == book.pages &&
-                Objects.equals(title, book.title) &&
-                Objects.equals(author, book.author);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, author, year, price, pages);
+        return title + " by " + author + ", pages: " + pages + ", price: " + price;
     }
 }
