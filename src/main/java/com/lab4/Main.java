@@ -1,9 +1,10 @@
 package com.lab4;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Driver class for program testing.
+ * Driver class.
  */
 public class Main {
 
@@ -11,16 +12,15 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
 
-        Library library = new Library("City Library");
+        ArrayList<Book> books = new ArrayList<>();
 
         while (true) {
 
             System.out.println("\n===== MENU =====");
-            System.out.println("1. Add book");
-            System.out.println("2. Show all books");
-            System.out.println("3. Show number of books");
-            System.out.println("4. Create copy of first book");
-            System.out.println("5. Exit");
+            System.out.println("1. Add EBook");
+            System.out.println("2. Add PaperBook");
+            System.out.println("3. Show all books");
+            System.out.println("4. Exit");
             System.out.print("Choose option: ");
 
             String choice = scanner.nextLine();
@@ -43,55 +43,21 @@ public class Main {
                         System.out.print("Enter price: ");
                         double price = Double.parseDouble(scanner.nextLine());
 
-                        System.out.println("Choose genre:");
-                        System.out.println("1. FANTASY");
-                        System.out.println("2. SCIENCE");
-                        System.out.println("3. HISTORY");
-                        System.out.println("4. ROMANCE");
-                        System.out.println("5. DETECTIVE");
+                        System.out.print("Enter file size: ");
+                        double fileSize = Double.parseDouble(scanner.nextLine());
 
-                        int genreChoice = Integer.parseInt(scanner.nextLine());
-
-                        Genre genre;
-
-                        switch (genreChoice) {
-
-                            case 1:
-                                genre = Genre.FANTASY;
-                                break;
-
-                            case 2:
-                                genre = Genre.SCIENCE;
-                                break;
-
-                            case 3:
-                                genre = Genre.HISTORY;
-                                break;
-
-                            case 4:
-                                genre = Genre.ROMANCE;
-                                break;
-
-                            case 5:
-                                genre = Genre.DETECTIVE;
-                                break;
-
-                            default:
-                                System.out.println("Invalid genre!");
-                                continue;
-                        }
-
-                        Book book = new Book(
+                        EBook ebook = new EBook(
                                 title,
                                 author,
                                 pages,
                                 price,
-                                genre
+                                Genre.FANTASY,
+                                fileSize
                         );
 
-                        library.addBook(book);
+                        books.add(ebook);
 
-                        System.out.println("Book added successfully!");
+                        System.out.println("EBook added!");
 
                     } catch (NumberFormatException e) {
 
@@ -106,31 +72,63 @@ public class Main {
 
                 case "2":
 
-                    library.showBooks();
-                    break;
+                    try {
 
-                case "3":
+                        System.out.print("Enter title: ");
+                        String title = scanner.nextLine();
 
-                    System.out.println("Books created: " + Book.getBookCount());
-                    break;
+                        System.out.print("Enter author: ");
+                        String author = scanner.nextLine();
 
-                case "4":
+                        System.out.print("Enter pages: ");
+                        int pages = Integer.parseInt(scanner.nextLine());
 
-                    if (library.getBooks().size() > 0) {
+                        System.out.print("Enter price: ");
+                        double price = Double.parseDouble(scanner.nextLine());
 
-                        Book copyBook = new Book(library.getBooks().get(0));
+                        System.out.print("Enter weight: ");
+                        double weight = Double.parseDouble(scanner.nextLine());
 
-                        System.out.println("Copy created:");
-                        System.out.println(copyBook);
+                        PaperBook paperBook = new PaperBook(
+                                title,
+                                author,
+                                pages,
+                                price,
+                                Genre.HISTORY,
+                                weight
+                        );
 
-                    } else {
+                        books.add(paperBook);
 
-                        System.out.println("Library is empty!");
+                        System.out.println("PaperBook added!");
+
+                    } catch (NumberFormatException e) {
+
+                        System.out.println("Invalid numeric input!");
+
+                    } catch (IllegalArgumentException e) {
+
+                        System.out.println("Error: " + e.getMessage());
                     }
 
                     break;
 
-                case "5":
+                case "3":
+
+                    if (books.isEmpty()) {
+
+                        System.out.println("No books found.");
+
+                    } else {
+
+                        for (Book book : books) {
+                            System.out.println(book);
+                        }
+                    }
+
+                    break;
+
+                case "4":
 
                     System.out.println("Program finished.");
                     scanner.close();
@@ -138,7 +136,7 @@ public class Main {
 
                 default:
 
-                    System.out.println("Invalid menu option!");
+                    System.out.println("Invalid option!");
             }
         }
     }
