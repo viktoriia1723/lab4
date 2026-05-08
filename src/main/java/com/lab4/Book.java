@@ -1,16 +1,27 @@
 package com.lab4;
 
+/**
+ * Base class Book.
+ */
 public class Book {
-    private String title;
-    private String author;
-    private int pages;
-    private double price;
 
-    public Book(String title, String author, int pages, double price) {
+    protected String title;
+    protected String author;
+    protected int pages;
+    protected double price;
+    protected Genre genre;
+
+    public Book(String title,
+                String author,
+                int pages,
+                double price,
+                Genre genre) {
+
         setTitle(title);
         setAuthor(author);
         setPages(pages);
         setPrice(price);
+        setGenre(genre);
     }
 
     public String getTitle() {
@@ -18,9 +29,11 @@ public class Book {
     }
 
     public void setTitle(String title) {
-        if (title == null || title.isEmpty()) {
+
+        if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("Title cannot be empty");
         }
+
         this.title = title;
     }
 
@@ -29,9 +42,11 @@ public class Book {
     }
 
     public void setAuthor(String author) {
-        if (author == null || author.isEmpty()) {
+
+        if (author == null || author.trim().isEmpty()) {
             throw new IllegalArgumentException("Author cannot be empty");
         }
+
         this.author = author;
     }
 
@@ -40,9 +55,11 @@ public class Book {
     }
 
     public void setPages(int pages) {
+
         if (pages <= 0) {
-            throw new IllegalArgumentException("Pages must be > 0");
+            throw new IllegalArgumentException("Pages must be greater than 0");
         }
+
         this.pages = pages;
     }
 
@@ -51,14 +68,36 @@ public class Book {
     }
 
     public void setPrice(double price) {
+
         if (price <= 0) {
-            throw new IllegalArgumentException("Price must be > 0");
+            throw new IllegalArgumentException("Price must be greater than 0");
         }
+
         this.price = price;
+    }
+
+    public Genre getGenre() {
+        return genre;
+    }
+
+    public void setGenre(Genre genre) {
+
+        if (genre == null) {
+            throw new IllegalArgumentException("Genre cannot be null");
+        }
+
+        this.genre = genre;
     }
 
     @Override
     public String toString() {
-        return title + " by " + author + ", pages: " + pages + ", price: " + price;
+
+        return "Book{" +
+                "title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", pages=" + pages +
+                ", price=" + price +
+                ", genre=" + genre +
+                '}';
     }
 }
