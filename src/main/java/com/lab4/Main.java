@@ -21,17 +21,21 @@ public class Main {
 
         while (true) {
             System.out.println("\n===== MENU =====");
-            System.out.println("1. Add new book");
-            System.out.println("2. Show all books");
-            System.out.println("3. Exit");
+            System.out.println("1. Search book");
+            System.out.println("2. Add new book");
+            System.out.println("3. Show all books");
+            System.out.println("4. Exit");
             System.out.print("Choose option: ");
             String choice = scanner.nextLine();
 
             switch (choice) {
                 case "1":
-                    addBook(scanner, books);
+                    searchMenu(scanner, books);
                     break;
                 case "2":
+                    addBook(scanner, books);
+                    break;
+                case "3":
                     if (books.isEmpty()) {
                         System.out.println("No books found.");
                     } else {
@@ -40,13 +44,116 @@ public class Main {
                         }
                     }
                     break;
-                case "3":
+                case "4":
                     saveToFile(books);
                     System.out.println("Program finished.");
                     scanner.close();
                     return;
                 default:
                     System.out.println("Invalid option!");
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    //  Search menu
+    // -------------------------------------------------------------------------
+
+    private static void searchMenu(Scanner scanner, ArrayList<Book> books) {
+        System.out.println("\n--- Search by ---");
+        System.out.println("1. Genre");
+        System.out.println("2. Author");
+        System.out.println("3. Max price");
+        System.out.println("0. Back to main menu");
+        System.out.print("Choose criterion: ");
+        String choice = scanner.nextLine();
+
+        switch (choice) {
+            case "1":
+                System.out.println("Select genre:");
+                System.out.println("1. FANTASY");
+                System.out.println("2. SCIENCE");
+                System.out.println("3. HISTORY");
+                System.out.println("4. ROMANCE");
+                System.out.println("5. DETECTIVE");
+                System.out.print("Choose genre: ");
+                String genreChoice = scanner.nextLine();
+                Genre genre;
+                switch (genreChoice) {
+                    case "1": genre = Genre.FANTASY;   break;
+                    case "2": genre = Genre.SCIENCE;   break;
+                    case "3": genre = Genre.HISTORY;   break;
+                    case "4": genre = Genre.ROMANCE;   break;
+                    case "5": genre = Genre.DETECTIVE; break;
+                    default:
+                        System.out.println("Invalid genre choice!");
+                        return;
+                }
+                printResults(searchByGenre(books, genre));
+                break;
+            case "2":
+                System.out.print("Enter author name: ");
+                String author = scanner.nextLine();
+                printResults(searchByAuthor(books, author));
+                break;
+            case "3":
+                try {
+                    System.out.print("Enter max price: ");
+                    double maxPrice = Double.parseDouble(scanner.nextLine());
+                    printResults(searchByMaxPrice(books, maxPrice));
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid numeric input!");
+                }
+                break;
+            case "0":
+                System.out.println("Returning to main menu.");
+                break;
+            default:
+                System.out.println("Invalid option!");
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    //  Search methods
+    // -------------------------------------------------------------------------
+
+    private static ArrayList<Book> searchByGenre(ArrayList<Book> books, Genre genre) {
+        ArrayList<Book> result = new ArrayList<Book>();
+        for (Book book : books) {
+            if (book.getGenre() == genre) {
+                result.add(book);
+            }
+        }
+        return result;
+    }
+
+    private static ArrayList<Book> searchByAuthor(ArrayList<Book> books, String author) {
+        ArrayList<Book> result = new ArrayList<Book>();
+        for (Book book : books) {
+            if (book.getAuthor().toLowerCase().contains(author.toLowerCase())) {
+                result.add(book);
+            }
+        }
+        return result;
+    }
+
+    private static ArrayList<Book> searchByMaxPrice(ArrayList<Book> books, double maxPrice) {
+        ArrayList<Book> result = new ArrayList<Book>();
+        for (Book book : books) {
+            if (book.getPrice() <= maxPrice) {
+                result.add(book);
+            }
+        }
+        return result;
+    }
+
+    private static void printResults(ArrayList<Book> results) {
+        if (results.isEmpty()) {
+            System.out.println("No books found matching the criteria.");
+        } else {
+            System.out.println("Found " + results.size() + " book(s):");
+            for (Book book : results) {
+                System.out.println(book);
             }
         }
     }
