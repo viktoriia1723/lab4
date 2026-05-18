@@ -16,8 +16,14 @@ public class Main {
     private static final String FILE_NAME = "input.txt";
 
     public static void main(String[] args) {
+        String configPath = "db.properties";
+        if (args.length > 0) {
+            configPath = args[0];
+        }
+
         Scanner scanner = new Scanner(System.in);
         Library library = loadFromFile();
+        DatabaseManager dbManager = new DatabaseManager(configPath);
 
         while (true) {
             System.out.println("\n===== MENU =====");
@@ -33,13 +39,14 @@ public class Main {
                     searchMenu(scanner, library);
                     break;
                 case "2":
-                    addBook(scanner, library);
+                    addBook(scanner, library, dbManager);
                     break;
                 case "3":
                     library.printAllBooks();
                     break;
                 case "4":
                     saveToFile(library);
+                    dbManager.close();
                     System.out.println("Program finished.");
                     scanner.close();
                     return;
@@ -122,7 +129,7 @@ public class Main {
     //  Add book via menu
     // -------------------------------------------------------------------------
 
-    private static void addBook(Scanner scanner, Library library) {
+    private static void addBook(Scanner scanner, Library library, DatabaseManager dbManager) {
         System.out.println("\n--- Select book type ---");
         System.out.println("1. EBook");
         System.out.println("2. PaperBook");
@@ -214,6 +221,7 @@ public class Main {
 
             if (book != null) {
                 library.addNewBook(book, quantity);
+                dbManager.insertBook(book);
                 System.out.println("Book added to library!");
             }
 
