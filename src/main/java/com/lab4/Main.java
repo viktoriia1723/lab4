@@ -17,7 +17,7 @@ public class Main {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ArrayList<Book> books = loadFromFile();
+        Library library = loadFromFile();
 
         while (true) {
             System.out.println("\n===== MENU =====");
@@ -30,22 +30,16 @@ public class Main {
 
             switch (choice) {
                 case "1":
-                    searchMenu(scanner, books);
+                    searchMenu(scanner, library);
                     break;
                 case "2":
-                    addBook(scanner, books);
+                    addBook(scanner, library);
                     break;
                 case "3":
-                    if (books.isEmpty()) {
-                        System.out.println("No books found.");
-                    } else {
-                        for (Book book : books) {
-                            System.out.println(book);
-                        }
-                    }
+                    library.printAllBooks();
                     break;
                 case "4":
-                    saveToFile(books);
+                    saveToFile(library);
                     System.out.println("Program finished.");
                     scanner.close();
                     return;
@@ -59,7 +53,7 @@ public class Main {
     //  Search menu
     // -------------------------------------------------------------------------
 
-    private static void searchMenu(Scanner scanner, ArrayList<Book> books) {
+    private static void searchMenu(Scanner scanner, Library library) {
         System.out.println("\n--- Search by ---");
         System.out.println("1. Genre");
         System.out.println("2. Author");
@@ -89,18 +83,18 @@ public class Main {
                         System.out.println("Invalid genre choice!");
                         return;
                 }
-                printResults(searchByGenre(books, genre));
+                printResults(library.searchByGenre(genre));
                 break;
             case "2":
                 System.out.print("Enter author name: ");
                 String author = scanner.nextLine();
-                printResults(searchByAuthor(books, author));
+                printResults(library.searchByAuthor(author));
                 break;
             case "3":
                 try {
                     System.out.print("Enter max price: ");
                     double maxPrice = Double.parseDouble(scanner.nextLine());
-                    printResults(searchByMaxPrice(books, maxPrice));
+                    printResults(library.searchByMaxPrice(maxPrice));
                 } catch (NumberFormatException e) {
                     System.out.println("Invalid numeric input!");
                 }
@@ -111,40 +105,6 @@ public class Main {
             default:
                 System.out.println("Invalid option!");
         }
-    }
-
-    // -------------------------------------------------------------------------
-    //  Search methods
-    // -------------------------------------------------------------------------
-
-    private static ArrayList<Book> searchByGenre(ArrayList<Book> books, Genre genre) {
-        ArrayList<Book> result = new ArrayList<Book>();
-        for (Book book : books) {
-            if (book.getGenre() == genre) {
-                result.add(book);
-            }
-        }
-        return result;
-    }
-
-    private static ArrayList<Book> searchByAuthor(ArrayList<Book> books, String author) {
-        ArrayList<Book> result = new ArrayList<Book>();
-        for (Book book : books) {
-            if (book.getAuthor().toLowerCase().contains(author.toLowerCase())) {
-                result.add(book);
-            }
-        }
-        return result;
-    }
-
-    private static ArrayList<Book> searchByMaxPrice(ArrayList<Book> books, double maxPrice) {
-        ArrayList<Book> result = new ArrayList<Book>();
-        for (Book book : books) {
-            if (book.getPrice() <= maxPrice) {
-                result.add(book);
-            }
-        }
-        return result;
     }
 
     private static void printResults(ArrayList<Book> results) {
@@ -159,141 +119,10 @@ public class Main {
     }
 
     // -------------------------------------------------------------------------
-    //  File operations
-    // -------------------------------------------------------------------------
-
-    public static ArrayList<Book> loadFromFile() {
-        ArrayList<Book> books = new ArrayList<Book>();
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(FILE_NAME));
-            String line;
-            int lineNumber = 0;
-            while ((line = reader.readLine()) != null) {
-                lineNumber++;
-                line = line.trim();
-                if (line.isEmpty()) {
-                    continue;
-                }
-                try {
-                    Book book = parseLine(line);
-                    if (book != null) {
-                        books.add(book);
-                    }
-                } catch (Exception e) {
-                    System.out.println("Skipping invalid line " + lineNumber + ": " + e.getMessage());
-                }
-            }
-            System.out.println("Loaded " + books.size() + " book(s) from " + FILE_NAME);
-        } catch (IOException e) {
-            System.out.println("File not found or cannot be read. Starting with empty collection.");
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    System.out.println("Error closing file: " + e.getMessage());
-                }
-            }
-        }
-        return books;
-    }
-
-    private static Book parseLine(String line) {
-        String[] parts = line.split("\\|");
-        if (parts.length < 7) {
-            throw new IllegalArgumentException("Not enough fields: " + line);
-        }
-
-        String type   = parts[0].trim().toUpperCase();
-        String title  = parts[1].trim();
-        String author = parts[2].trim();
-        int pages     = Integer.parseInt(parts[3].trim());
-        double price  = Double.parseDouble(parts[4].trim());
-        Genre genre   = Genre.valueOf(parts[5].trim().toUpperCase());
-
-        switch (type) {
-            case "EBOOK": {
-                double fileSize = Double.parseDouble(parts[6].trim());
-                return new EBook(title, author, pages, price, genre, fileSize);
-            }
-            case "PAPERBOOK": {
-                double weight = Double.parseDouble(parts[6].trim());
-                return new PaperBook(title, author, pages, price, genre, weight);
-            }
-            case "AUDIOBOOK": {
-                if (parts.length < 8) {
-                    throw new IllegalArgumentException("AudioBook requires 8 fields: " + line);
-                }
-                String narrator     = parts[6].trim();
-                int durationMinutes = Integer.parseInt(parts[7].trim());
-                return new AudioBook(title, author, pages, price, genre, narrator, durationMinutes);
-            }
-            case "COMICBOOK": {
-                if (parts.length < 8) {
-                    throw new IllegalArgumentException("ComicBook requires 8 fields: " + line);
-                }
-                String publisher = parts[6].trim();
-                int issues       = Integer.parseInt(parts[7].trim());
-                return new ComicBook(title, author, pages, price, genre, publisher, issues);
-            }
-            default:
-                throw new IllegalArgumentException("Unknown book type: " + type);
-        }
-    }
-
-    public static void saveToFile(ArrayList<Book> books) {
-        BufferedWriter writer = null;
-        try {
-            writer = new BufferedWriter(new FileWriter(FILE_NAME));
-            for (Book book : books) {
-                writer.write(toFileLine(book));
-                writer.newLine();
-            }
-            System.out.println("Saved " + books.size() + " book(s) to " + FILE_NAME);
-        } catch (IOException e) {
-            System.out.println("Error saving to file: " + e.getMessage());
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    System.out.println("Error closing file: " + e.getMessage());
-                }
-            }
-        }
-    }
-
-    private static String toFileLine(Book book) {
-        if (book instanceof EBook) {
-            EBook e = (EBook) book;
-            return "EBOOK|" + e.getTitle() + "|" + e.getAuthor() + "|"
-                    + e.getPages() + "|" + e.getPrice() + "|"
-                    + e.getGenre() + "|" + e.getFileSize();
-        } else if (book instanceof PaperBook) {
-            PaperBook p = (PaperBook) book;
-            return "PAPERBOOK|" + p.getTitle() + "|" + p.getAuthor() + "|"
-                    + p.getPages() + "|" + p.getPrice() + "|"
-                    + p.getGenre() + "|" + p.getWeight();
-        } else if (book instanceof AudioBook) {
-            AudioBook a = (AudioBook) book;
-            return "AUDIOBOOK|" + a.getTitle() + "|" + a.getAuthor() + "|"
-                    + a.getPages() + "|" + a.getPrice() + "|"
-                    + a.getGenre() + "|" + a.getNarrator() + "|" + a.getDurationMinutes();
-        } else if (book instanceof ComicBook) {
-            ComicBook c = (ComicBook) book;
-            return "COMICBOOK|" + c.getTitle() + "|" + c.getAuthor() + "|"
-                    + c.getPages() + "|" + c.getPrice() + "|"
-                    + c.getGenre() + "|" + c.getPublisher() + "|" + c.getIssues();
-        }
-        return "";
-    }
-
-    // -------------------------------------------------------------------------
     //  Add book via menu
     // -------------------------------------------------------------------------
 
-    private static void addBook(Scanner scanner, ArrayList<Book> books) {
+    private static void addBook(Scanner scanner, Library library) {
         System.out.println("\n--- Select book type ---");
         System.out.println("1. EBook");
         System.out.println("2. PaperBook");
@@ -345,21 +174,22 @@ public class Main {
                 default: throw new IllegalArgumentException("Invalid genre choice");
             }
 
+            System.out.print("Enter quantity: ");
+            int quantity = Integer.parseInt(scanner.nextLine());
+
+            Book book = null;
+
             switch (typeChoice) {
                 case "1": {
                     System.out.print("Enter file size (MB): ");
                     double fileSize = Double.parseDouble(scanner.nextLine());
-                    EBook ebook = new EBook(title, author, pages, price, genre, fileSize);
-                    books.add(ebook);
-                    System.out.println("EBook added!");
+                    book = new EBook(title, author, pages, price, genre, fileSize);
                     break;
                 }
                 case "2": {
                     System.out.print("Enter weight (kg): ");
                     double weight = Double.parseDouble(scanner.nextLine());
-                    PaperBook paperBook = new PaperBook(title, author, pages, price, genre, weight);
-                    books.add(paperBook);
-                    System.out.println("PaperBook added!");
+                    book = new PaperBook(title, author, pages, price, genre, weight);
                     break;
                 }
                 case "3": {
@@ -367,9 +197,7 @@ public class Main {
                     String narrator = scanner.nextLine();
                     System.out.print("Enter duration (minutes): ");
                     int duration = Integer.parseInt(scanner.nextLine());
-                    AudioBook audioBook = new AudioBook(title, author, pages, price, genre, narrator, duration);
-                    books.add(audioBook);
-                    System.out.println("AudioBook added!");
+                    book = new AudioBook(title, author, pages, price, genre, narrator, duration);
                     break;
                 }
                 case "4": {
@@ -377,13 +205,16 @@ public class Main {
                     String publisher = scanner.nextLine();
                     System.out.print("Enter number of issues: ");
                     int issues = Integer.parseInt(scanner.nextLine());
-                    ComicBook comicBook = new ComicBook(title, author, pages, price, genre, publisher, issues);
-                    books.add(comicBook);
-                    System.out.println("ComicBook added!");
+                    book = new ComicBook(title, author, pages, price, genre, publisher, issues);
                     break;
                 }
                 default:
                     break;
+            }
+
+            if (book != null) {
+                library.addNewBook(book, quantity);
+                System.out.println("Book added to library!");
             }
 
         } catch (NumberFormatException e) {
@@ -391,5 +222,150 @@ public class Main {
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
+    }
+
+    // -------------------------------------------------------------------------
+    //  File operations
+    // -------------------------------------------------------------------------
+
+    public static Library loadFromFile() {
+        Library library = new Library("Default Library", "Unknown Address");
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(FILE_NAME));
+            String line;
+            int lineNumber = 0;
+            while ((line = reader.readLine()) != null) {
+                lineNumber++;
+                line = line.trim();
+                if (line.isEmpty()) {
+                    continue;
+                }
+                try {
+                    if (line.startsWith("LIBRARY|")) {
+                        String[] parts = line.split("\\|");
+                        if (parts.length >= 3) {
+                            library = new Library(parts[1].trim(), parts[2].trim());
+                        }
+                    } else {
+                        String[] parts = line.split("\\|");
+                        int quantity = Integer.parseInt(parts[parts.length - 1].trim());
+                        String bookLine = line.substring(0, line.lastIndexOf("|"));
+                        Book book = parseLine(bookLine);
+                        if (book != null) {
+                            library.addNewBook(book, quantity);
+                        }
+                    }
+                } catch (Exception e) {
+                    System.out.println("Skipping invalid line " + lineNumber + ": " + e.getMessage());
+                }
+            }
+            System.out.println("Loaded library: " + library.getName());
+            System.out.println("Loaded " + library.getTotalDistinctBooks() + " book(s) from " + FILE_NAME);
+        } catch (IOException e) {
+            System.out.println("File not found or cannot be read. Starting with empty library.");
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    System.out.println("Error closing file: " + e.getMessage());
+                }
+            }
+        }
+        return library;
+    }
+
+    private static Book parseLine(String line) {
+        String[] parts = line.split("\\|");
+        if (parts.length < 7) {
+            throw new IllegalArgumentException("Not enough fields: " + line);
+        }
+
+        String type   = parts[0].trim().toUpperCase();
+        String title  = parts[1].trim();
+        String author = parts[2].trim();
+        int pages     = Integer.parseInt(parts[3].trim());
+        double price  = Double.parseDouble(parts[4].trim());
+        Genre genre   = Genre.valueOf(parts[5].trim().toUpperCase());
+
+        switch (type) {
+            case "EBOOK": {
+                double fileSize = Double.parseDouble(parts[6].trim());
+                return new EBook(title, author, pages, price, genre, fileSize);
+            }
+            case "PAPERBOOK": {
+                double weight = Double.parseDouble(parts[6].trim());
+                return new PaperBook(title, author, pages, price, genre, weight);
+            }
+            case "AUDIOBOOK": {
+                if (parts.length < 8) {
+                    throw new IllegalArgumentException("AudioBook requires 8 fields: " + line);
+                }
+                String narrator     = parts[6].trim();
+                int durationMinutes = Integer.parseInt(parts[7].trim());
+                return new AudioBook(title, author, pages, price, genre, narrator, durationMinutes);
+            }
+            case "COMICBOOK": {
+                if (parts.length < 8) {
+                    throw new IllegalArgumentException("ComicBook requires 8 fields: " + line);
+                }
+                String publisher = parts[6].trim();
+                int issues       = Integer.parseInt(parts[7].trim());
+                return new ComicBook(title, author, pages, price, genre, publisher, issues);
+            }
+            default:
+                throw new IllegalArgumentException("Unknown book type: " + type);
+        }
+    }
+
+    public static void saveToFile(Library library) {
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(FILE_NAME));
+            writer.write("LIBRARY|" + library.getName() + "|" + library.getAddress());
+            writer.newLine();
+            ArrayList<Book> books = library.getBooks();
+            for (int i = 0; i < books.size(); i++) {
+                writer.write(toFileLine(books.get(i)) + "|" + library.getQuantity(i));
+                writer.newLine();
+            }
+            System.out.println("Saved " + library.getTotalDistinctBooks() + " book(s) to " + FILE_NAME);
+        } catch (IOException e) {
+            System.out.println("Error saving to file: " + e.getMessage());
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    System.out.println("Error closing file: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    private static String toFileLine(Book book) {
+        if (book instanceof EBook) {
+            EBook e = (EBook) book;
+            return "EBOOK|" + e.getTitle() + "|" + e.getAuthor() + "|"
+                    + e.getPages() + "|" + e.getPrice() + "|"
+                    + e.getGenre() + "|" + e.getFileSize();
+        } else if (book instanceof PaperBook) {
+            PaperBook p = (PaperBook) book;
+            return "PAPERBOOK|" + p.getTitle() + "|" + p.getAuthor() + "|"
+                    + p.getPages() + "|" + p.getPrice() + "|"
+                    + p.getGenre() + "|" + p.getWeight();
+        } else if (book instanceof AudioBook) {
+            AudioBook a = (AudioBook) book;
+            return "AUDIOBOOK|" + a.getTitle() + "|" + a.getAuthor() + "|"
+                    + a.getPages() + "|" + a.getPrice() + "|"
+                    + a.getGenre() + "|" + a.getNarrator() + "|" + a.getDurationMinutes();
+        } else if (book instanceof ComicBook) {
+            ComicBook c = (ComicBook) book;
+            return "COMICBOOK|" + c.getTitle() + "|" + c.getAuthor() + "|"
+                    + c.getPages() + "|" + c.getPrice() + "|"
+                    + c.getGenre() + "|" + c.getPublisher() + "|" + c.getIssues();
+        }
+        return "";
     }
 }
