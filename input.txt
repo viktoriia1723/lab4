@@ -1,0 +1,5 @@
+LIBRARY|City Library|Main Street 1
+EBOOK|Dune|Frank Herbert|412|350.0|FANTASY|15.5|3
+PAPERBOOK|Kobzar|Taras Shevchenko|180|120.0|HISTORY|0.3|5
+AUDIOBOOK|Harry Potter|J.K. Rowling|500|200.0|ROMANCE|Jim Dale|720|2
+COMICBOOK|Batman|Bob Kane|96|85.0|DETECTIVE|DC Comics|12|4
