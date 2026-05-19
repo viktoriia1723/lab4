@@ -1,6 +1,7 @@
 package com.lab4;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -24,7 +25,8 @@ public class Main {
             System.out.println("1. Search book");
             System.out.println("2. Add new book");
             System.out.println("3. Show all books");
-            System.out.println("4. Exit");
+            System.out.println("4. Show all books sorted by title");
+            System.out.println("5. Exit");
             System.out.print("Choose option: ");
             String choice = scanner.nextLine();
 
@@ -39,6 +41,9 @@ public class Main {
                     library.printAllBooks();
                     break;
                 case "4":
+                    printSortedBooks(library);
+                    break;
+                case "5":
                     saveToFile(library);
                     System.out.println("Program finished.");
                     scanner.close();
@@ -46,6 +51,24 @@ public class Main {
                 default:
                     System.out.println("Invalid option!");
             }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    //  Sorted output
+    // -------------------------------------------------------------------------
+
+    private static void printSortedBooks(Library library) {
+        ArrayList<Book> books = library.getBooks();
+        if (books.isEmpty()) {
+            System.out.println("No books in library.");
+            return;
+        }
+        ArrayList<Book> sorted = new ArrayList<Book>(books);
+        Collections.sort(sorted);
+        System.out.println("=== Books sorted by title ===");
+        for (Book book : sorted) {
+            System.out.println(book);
         }
     }
 
