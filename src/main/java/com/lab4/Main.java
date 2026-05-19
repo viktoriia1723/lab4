@@ -2,6 +2,7 @@ package com.lab4;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Scanner;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -25,7 +26,7 @@ public class Main {
             System.out.println("1. Search book");
             System.out.println("2. Add new book");
             System.out.println("3. Show all books");
-            System.out.println("4. Show all books sorted by title");
+            System.out.println("4. Show all books sorted");
             System.out.println("5. Exit");
             System.out.print("Choose option: ");
             String choice = scanner.nextLine();
@@ -41,7 +42,7 @@ public class Main {
                     library.printAllBooks();
                     break;
                 case "4":
-                    printSortedBooks(library);
+                    sortMenu(scanner, library);
                     break;
                 case "5":
                     saveToFile(library);
@@ -55,18 +56,68 @@ public class Main {
     }
 
     // -------------------------------------------------------------------------
-    //  Sorted output
+    //  Sort menu
     // -------------------------------------------------------------------------
 
-    private static void printSortedBooks(Library library) {
+    private static void sortMenu(Scanner scanner, Library library) {
+        System.out.println("\n--- Select sort criterion ---");
+        System.out.println("1. Sort by title");
+        System.out.println("2. Sort by price");
+        System.out.println("3. Sort by pages");
+        System.out.println("0. Back to main menu");
+        System.out.print("Choose criterion: ");
+        String choice = scanner.nextLine();
+
         ArrayList<Book> books = library.getBooks();
         if (books.isEmpty()) {
             System.out.println("No books in library.");
             return;
         }
+
         ArrayList<Book> sorted = new ArrayList<Book>(books);
-        Collections.sort(sorted);
-        System.out.println("=== Books sorted by title ===");
+
+        switch (choice) {
+            case "1": {
+                Comparator<Book> byTitle = new Comparator<Book>() {
+                    @Override
+                    public int compare(Book o1, Book o2) {
+                        return o1.getTitle().compareToIgnoreCase(o2.getTitle());
+                    }
+                };
+                Collections.sort(sorted, byTitle);
+                System.out.println("=== Books sorted by title ===");
+                break;
+            }
+            case "2": {
+                Comparator<Book> byPrice = new Comparator<Book>() {
+                    @Override
+                    public int compare(Book o1, Book o2) {
+                        return Double.compare(o1.getPrice(), o2.getPrice());
+                    }
+                };
+                Collections.sort(sorted, byPrice);
+                System.out.println("=== Books sorted by price ===");
+                break;
+            }
+            case "3": {
+                Comparator<Book> byPages = new Comparator<Book>() {
+                    @Override
+                    public int compare(Book o1, Book o2) {
+                        return Integer.compare(o1.getPages(), o2.getPages());
+                    }
+                };
+                Collections.sort(sorted, byPages);
+                System.out.println("=== Books sorted by pages ===");
+                break;
+            }
+            case "0":
+                System.out.println("Returning to main menu.");
+                return;
+            default:
+                System.out.println("Invalid option!");
+                return;
+        }
+
         for (Book book : sorted) {
             System.out.println(book);
         }
