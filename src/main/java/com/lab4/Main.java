@@ -56,7 +56,7 @@ public class Main {
     }
 
     // -------------------------------------------------------------------------
-    //  Sort menu
+    //  Sort menu — lambda expressions
     // -------------------------------------------------------------------------
 
     private static void sortMenu(Scanner scanner, Library library) {
@@ -78,34 +78,19 @@ public class Main {
 
         switch (choice) {
             case "1": {
-                Comparator<Book> byTitle = new Comparator<Book>() {
-                    @Override
-                    public int compare(Book o1, Book o2) {
-                        return o1.getTitle().compareToIgnoreCase(o2.getTitle());
-                    }
-                };
+                Comparator<Book> byTitle = (o1, o2) -> o1.getTitle().compareToIgnoreCase(o2.getTitle());
                 Collections.sort(sorted, byTitle);
                 System.out.println("=== Books sorted by title ===");
                 break;
             }
             case "2": {
-                Comparator<Book> byPrice = new Comparator<Book>() {
-                    @Override
-                    public int compare(Book o1, Book o2) {
-                        return Double.compare(o1.getPrice(), o2.getPrice());
-                    }
-                };
+                Comparator<Book> byPrice = (o1, o2) -> Double.compare(o1.getPrice(), o2.getPrice());
                 Collections.sort(sorted, byPrice);
                 System.out.println("=== Books sorted by price ===");
                 break;
             }
             case "3": {
-                Comparator<Book> byPages = new Comparator<Book>() {
-                    @Override
-                    public int compare(Book o1, Book o2) {
-                        return Integer.compare(o1.getPages(), o2.getPages());
-                    }
-                };
+                Comparator<Book> byPages = (o1, o2) -> Integer.compare(o1.getPages(), o2.getPages());
                 Collections.sort(sorted, byPages);
                 System.out.println("=== Books sorted by pages ===");
                 break;
